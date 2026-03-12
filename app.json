@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Escala de Voluntários",
+    "slug": "escala-voluntarios-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "escalamobile",
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1e3a5f"
+      },
+      "package": "com.ccb.escalavoluntarios"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./src/app"
+        }
+      ]
+    ]
+  }
+}
