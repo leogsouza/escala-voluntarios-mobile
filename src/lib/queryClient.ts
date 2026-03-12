@@ -1,5 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 
+import { createMMKVPersister } from '@/lib/mmkv-persister';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -10,3 +12,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Export persister instance (used by PersistQueryClientProvider when available)
+export const mmkvPersister = createMMKVPersister();

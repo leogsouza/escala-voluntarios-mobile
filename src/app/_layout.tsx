@@ -1,23 +1,14 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, StyleSheet, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
 import { router, Stack } from 'expo-router';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { PaperProvider, MD3LightTheme } from 'react-native-paper';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 
+import NetworkBanner from '@/components/NetworkBanner';
 import { BRAND_COLORS } from '@/constants/colors';
 import { AuthProvider, useAuth } from '@/lib/auth-context';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 30 * 60 * 1000,
-      retry: 2,
-    },
-  },
-});
+import { queryClient } from '@/lib/queryClient';
 
 const theme = {
   ...MD3LightTheme,
@@ -34,6 +25,7 @@ function NavigationGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loading) return;
+
     if (!isAuthenticated && !hasNavigated.current) {
       hasNavigated.current = true;
       router.replace('/(auth)/login');
@@ -53,6 +45,7 @@ export default function RootLayout() {
       <PaperProvider theme={theme}>
         <AuthProvider>
           <NavigationGuard>
+            <NetworkBanner />
             <Stack screenOptions={{ headerTitleAlign: 'center' }}>
               <Stack.Screen name="(tabs)" options={{ title: 'Escala de Voluntários' }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />

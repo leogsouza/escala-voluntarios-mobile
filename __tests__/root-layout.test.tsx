@@ -14,6 +14,11 @@ jest.mock('expo-local-authentication', () => ({
   authenticateAsync: jest.fn().mockResolvedValue({ success: false }),
 }));
 
+jest.mock('@react-native-community/netinfo', () => ({
+  addEventListener: jest.fn(() => jest.fn()),
+  fetch: jest.fn().mockResolvedValue({ isConnected: true, isInternetReachable: true }),
+}));
+
 jest.mock('expo-router', () => ({
   router: { replace: jest.fn(), push: jest.fn() },
   Stack: Object.assign(
