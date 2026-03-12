@@ -1,4 +1,4 @@
-import { MMKV } from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Minimal type surface compatible with @tanstack/react-query-persist-client.
 // We intentionally avoid importing from that package because it is not
@@ -13,13 +13,10 @@ export type Persister = {
 const CACHE_KEY = 'react-query-cache';
 
 export function createMMKVPersister(): Persister {
-  // MUST: id 'react-query-cache'
-  const storage = new MMKV({ id: CACHE_KEY });
-
   return {
     async persistClient(client) {
       try {
-        storage.set(CACHE_KEY, JSON.stringify(client));
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(client));
       } catch {
         // Ignore persistence errors
       }
@@ -27,7 +24,7 @@ export function createMMKVPersister(): Persister {
 
     async restoreClient() {
       try {
-        const cached = storage.getString(CACHE_KEY);
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
         if (!cached) return undefined;
         return JSON.parse(cached) as PersistedClient;
       } catch {
@@ -37,7 +34,7 @@ export function createMMKVPersister(): Persister {
 
     async removeClient() {
       try {
-        storage.delete(CACHE_KEY);
+        await AsyncStorage.removeItem(CACHE_KEY);
       } catch {
         // ignore
       }

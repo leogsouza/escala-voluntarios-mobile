@@ -14,6 +14,12 @@ jest.mock('expo-local-authentication', () => ({
   authenticateAsync: jest.fn().mockResolvedValue({ success: false }),
 }));
 
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn().mockResolvedValue(null),
+  setItem: jest.fn().mockResolvedValue(undefined),
+  removeItem: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('@react-native-community/netinfo', () => ({
   addEventListener: jest.fn(() => jest.fn()),
   fetch: jest.fn().mockResolvedValue({ isConnected: true, isInternetReachable: true }),
