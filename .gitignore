@@ -1,11 +1,7 @@
-node_modules/
-.expo/
-dist/
-web-build/
-coverage/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.gradle/
+build/
+local.properties
+*.jks
+.idea/
+*.iml
 .DS_Store
-.serena/
