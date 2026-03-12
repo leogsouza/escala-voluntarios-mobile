@@ -19,7 +19,10 @@ export function DayEventCard({ event }: DayEventCardProps) {
   const colors = getServiceTypeColors(serviceType);
 
   const handlePress = () => {
-    router.push(`/(tabs)/schedule/event/${event.id}`);
+    router.push({
+      pathname: `/(tabs)/schedule/event/${event.id}`,
+      params: { eventJson: JSON.stringify(event) }
+    });
   };
 
   return (
