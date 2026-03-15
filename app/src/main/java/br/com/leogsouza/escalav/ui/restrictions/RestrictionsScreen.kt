@@ -21,6 +21,7 @@ fun RestrictionsScreen(
     onNewRestriction: () -> Unit,
     onEditRestriction: (Int) -> Unit,
     onBack: () -> Unit,
+    showBackButton: Boolean = true,
     viewModel: RestrictionsViewModel = hiltViewModel()
 ) {
     val state by viewModel.listState.collectAsState()
@@ -47,14 +48,18 @@ fun RestrictionsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Minhas Restrições") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+            if (showBackButton) {
+                TopAppBar(
+                    title = { Text("Minhas Restrições") },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                TopAppBar(title = { Text("Minhas Restrições") })
+            }
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onNewRestriction) {
