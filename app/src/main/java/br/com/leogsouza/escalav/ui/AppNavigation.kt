@@ -106,15 +106,16 @@ fun AppNavigation() {
             modifier = Modifier.padding(scaffoldPadding)
         ) {
             composable(Screen.Login.route) {
-                LoginScreen(
-                    onLoginSuccess = {},
-                    viewModel = authViewModel
-                )
+                LoginScreen(onLoginSuccess = {
+                    navController.navigate(Screen.Calendar.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                })
             }
             composable(Screen.Calendar.route) {
                 ScheduleCalendarScreen(
                     onDayClick = { date -> navController.navigate(Screen.DayDetail.createRoute(date)) },
-                    onEventClick = { id -> navController.navigate(Screen.EventDetail.createRoute(id)) },
+                    onRestrictionsClick = { navController.navigate(Screen.Restrictions.route) },
                     onLogout = { authViewModel.logout() }
                 )
             }
@@ -134,8 +135,7 @@ fun AppNavigation() {
                 RestrictionsScreen(
                     onNewRestriction = { navController.navigate(Screen.NewRestriction.route) },
                     onEditRestriction = { id -> navController.navigate(Screen.EditRestriction.createRoute(id)) },
-                    onBack = { navController.popBackStack() },
-                    showBackButton = false
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(Screen.NewRestriction.route) {
