@@ -34,6 +34,13 @@ interface ApiService {
     @GET("volunteers/search")
     suspend fun searchVolunteers(@Query("q") query: String): List<VolunteerDto>
 
+    @GET("volunteers/{id}")
+    suspend fun getVolunteerById(@Path("id") id: Int): VolunteerDto
+
+    // Positions
+    @GET("positions")
+    suspend fun getPositionsByRole(@Query("role_id") roleId: Int): List<PositionDto>
+
     // Restriction types
     @GET("restriction-types")
     suspend fun getRestrictionTypes(): List<RestrictionTypeDto>
@@ -44,7 +51,10 @@ interface ApiService {
         @Query("page") page: Int? = null,
         @Query("page_size") pageSize: Int? = null,
         @Query("schedule_id") scheduleId: Int? = null,
-        @Query("volunteer_id") volunteerId: Int? = null
+        @Query("volunteer_id") volunteerId: Int? = null,
+        @Query("role_ids") roleIds: String? = null,
+        @Query("q") searchQuery: String? = null,
+        @Query("active_only") activeOnly: Boolean? = null
     ): PaginatedRestrictionsDto
 
     @GET("restrictions/{id}")
@@ -58,4 +68,11 @@ interface ApiService {
 
     @DELETE("restrictions/{id}")
     suspend fun deleteRestriction(@Path("id") id: Int)
+
+    @GET("restrictions/role-counts")
+    suspend fun getRestrictionRoleCounts(@Query("schedule_id") scheduleId: Int): List<RoleCountDto>
+
+    // Schedule service codes
+    @GET("schedules/{scheduleId}/service-codes")
+    suspend fun getScheduleServiceCodes(@Path("scheduleId") scheduleId: Int): List<ServiceCodeDto>
 }
