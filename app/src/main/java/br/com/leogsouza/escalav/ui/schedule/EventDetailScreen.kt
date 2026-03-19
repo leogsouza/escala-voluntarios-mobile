@@ -32,6 +32,13 @@ private data class RoleGroupUi(
     val assignments: List<AssignmentDto>
 )
 
+private enum class EventVisualType {
+    RJM,
+    ENSAIO,
+    CULTO,
+    DEFAULT
+}
+
 private val ScreenBg = Color(0xFFF3F4F6)
 private val PanelBorder = Color(0xFFE5E7EB)
 private val RoleAccentBlue = Color(0xFF2563EB)
@@ -123,13 +130,15 @@ fun EventDetailScreen(
 private fun EventHeader(event: EventDto?, onBack: () -> Unit) {
     val dateText = event?.date?.let(::formatEventDate) ?: "Data não disponível"
     val timeText = event?.time?.let(::formatEventTime) ?: "--:--"
+    val headerColors = event?.let(::headerGradientColors)
+        ?: listOf(Color(0xFF8A2BE2), Color(0xFF6A0DAD))
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
                 brush = Brush.linearGradient(
-                    colors = listOf(Color(0xFF8A2BE2), Color(0xFF6A0DAD))
+                    colors = headerColors
                 )
             )
             .padding(horizontal = 20.dp, vertical = 16.dp)
@@ -368,3 +377,28 @@ private fun colorForVolunteer(name: String): Color {
     val index = kotlin.math.abs(name.hashCode()) % AvatarPalette.size
     return AvatarPalette[index]
 }
+
+private fun headerGradientColors(event: EventDto): List<Color> {
+    return when (eventVisualType(event)) {
+        EventVisualType.RJM -> listOf(Color(0xFF8A2BE2), Color(0xFF6A0DAD))
+        EventVisualType.ENSAIO -> listOf(Color(0xFFFF8A00), Color(0xFFFF6A00))
+        EventVisualType.CULTO -> listOf(Color(0xFF3B5BDB), Color(0xFF2E4FD6))
+        EventVisualType.DEFAULT -> listOf(Color(0xFF4B5563), Color(0xFF374151))
+    }
+}
+
+private fun eventVisualType(event: EventDto): EventVisualType {
+    val code = normalizeRoleName(event.serviceCode)
+    if (code.contains("rjm")) return EventVisualType.RJM
+    if (code.contains("ensaio") || code == "el") return EventVisualType.ENSAIO
+    if (code.contains("culto") || code == "dn") return EventVisualType.CULTO
+
+    val service = normalizeRoleName(event.service)
+    return when {
+        service.contains("rjm") -> EventVisualType.RJM
+        service.contains("ensaio") -> EventVisualType.ENSAIO
+        service.contains("culto") -> EventVisualType.CULTO
+        else -> EventVisualType.DEFAULT
+    }
+}
+
