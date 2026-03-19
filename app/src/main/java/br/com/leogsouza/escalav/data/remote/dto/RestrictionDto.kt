@@ -30,6 +30,8 @@ data class RestrictionRulesDto(
     val operator: String?,
     val weekdays: List<Int>?,
     val periods: List<String>?,
+    @Json(name = "serviceCodes") val serviceCodes: List<String>?,
+    @Json(name = "dayPattern") val dayPattern: String?,
     @Json(name = "specificDates") val specificDates: List<SpecificDateDto>?,
     @Json(name = "dateRanges") val dateRanges: List<DateRangeEntryDto>?
 )
@@ -44,7 +46,8 @@ data class RestrictionDto(
     @Json(name = "restriction_type") val restrictionType: RestrictionTypeDto?,
     @Json(name = "rules_json") val rulesJson: String?,
     val active: Boolean?,
-    val fixed: Boolean?
+    val fixed: Boolean?,
+    val volunteer: VolunteerDto?
 )
 
 @JsonClass(generateAdapter = true)
@@ -59,4 +62,21 @@ data class PaginationInfoDto(
 data class PaginatedRestrictionsDto(
     val data: List<RestrictionDto>,
     val pagination: PaginationInfoDto
+)
+
+@JsonClass(generateAdapter = true)
+data class ServiceCodeDto(
+    val code: String,
+    @Json(name = "name_pt") val namePt: String,
+    @Json(name = "name_en") val nameEn: String,
+    @Json(name = "day_of_week") val dayOfWeek: String,
+    val period: String,
+    @Json(name = "display_order") val displayOrder: Int
+)
+
+@JsonClass(generateAdapter = true)
+data class RoleCountDto(
+    @Json(name = "role_id") val roleId: Int,
+    @Json(name = "role_name") val roleName: String,
+    val count: Int
 )

@@ -47,6 +47,8 @@ data class VolunteerDto(
     val name: String,
     @Json(name = "full_name") val fullName: String,
     val active: Boolean?,
+    @Json(name = "main_role_id") val mainRoleId: Int?,
+    @Json(name = "secondary_role_id") val secondaryRoleId: Int?,
     @Json(name = "main_role") val mainRole: RoleDto?,
     @Json(name = "secondary_role") val secondaryRole: RoleDto?
 )
