@@ -22,6 +22,7 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val forcedLogoutMessage by viewModel.forcedLogoutMessage.collectAsState()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -93,7 +94,13 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (state is AuthState.Error) {
+                if (forcedLogoutMessage != null) {
+                    Text(
+                        text = forcedLogoutMessage!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else if (state is AuthState.Error) {
                     Text(
                         text = (state as AuthState.Error).message,
                         color = MaterialTheme.colorScheme.error,

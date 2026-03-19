@@ -3,10 +3,12 @@ package br.com.leogsouza.escalav.ui.auth
 import android.util.Base64
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import br.com.leogsouza.escalav.data.local.SessionEvents
 import br.com.leogsouza.escalav.data.local.TokenStore
 import br.com.leogsouza.escalav.data.remote.api.ApiService
 import br.com.leogsouza.escalav.data.remote.dto.LoginRequest
 import br.com.leogsouza.escalav.domain.model.UserSession
+import kotlinx.coroutines.flow.collect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,11 +27,24 @@ sealed class AuthState {
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val api: ApiService,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    sessionEvents: SessionEvents
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<AuthState>(AuthState.Idle)
     val state: StateFlow<AuthState> = _state
+
+    private val _forcedLogoutMessage = MutableStateFlow<String?>(null)
+    val forcedLogoutMessage: StateFlow<String?> = _forcedLogoutMessage
+
+    init {
+        viewModelScope.launch {
+            sessionEvents.forcedLogout.collect {
+                _forcedLogoutMessage.value = "Sua sessão expirou. Faça login novamente."
+                _state.value = AuthState.LoggedOut
+            }
+        }
+    }
 
     // Check if already logged in on startup
     fun checkSession() {
@@ -40,6 +55,7 @@ class AuthViewModel @Inject constructor(
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
+            _forcedLogoutMessage.value = null
             _state.value = AuthState.Loading
             try {
                 val tokens = api.login(LoginRequest(username, password))
@@ -64,6 +80,7 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         tokenStore.clear()
+        _forcedLogoutMessage.value = null
         _state.value = AuthState.LoggedOut
     }
 
