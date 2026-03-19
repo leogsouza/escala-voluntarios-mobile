@@ -17,7 +17,7 @@
 - Session bootstrap: `AppNavigation` triggers `AuthViewModel.checkSession()` and picks start destination (`login` vs `calendar`).
 - Auth header injection is centralized in `AppModule.provideOkHttp()` using `TokenStore.accessToken`.
 - Calendar flow: `ScheduleViewModel` fetches active schedule then month events; UI reads `eventsByDate` map.
-- Restriction CRUD: `RestrictionsViewModel` decodes volunteer id from JWT, resolves active `scheduleId`, then calls restriction endpoints.
+- Restriction CRUD (admin view): `RestrictionsListViewModel` + `RestrictionsFormViewModel` (split architecture). List shows ALL volunteers' restrictions with role filter chips, text search, and rich `RestrictionCard` components. Form uses `VolunteerSearchField` for volunteer selection, `ServiceCodeChips` from schedule events, `DayPatternSelector`, `SpecificDateSection`, and `DateRangeSection` for rules builder. Rules are serialized to `rules_json` JSON on save.
 
 ## Local Dev Workflow
 - Required config is in root `local.properties`: `API_BASE_URL=http://10.0.2.2:8080` (or LAN IP for physical device).
@@ -34,12 +34,16 @@
 
 ## High-Impact Integration Notes
 - Backend contract strongly shapes models: keep DTO names/`@Json` mappings consistent with API payloads.
-- `RestrictionsViewModel` and `AuthViewModel` both decode JWT manually; if changing claims, update both paths.
-- `RestrictionFormScreen` depends on `listState.scheduleId`/`volunteerId`; ensure list data is loaded before save flows.
+- **Restrictions ViewModel split**: `RestrictionsListViewModel` owns list state (role filter, search, delete). `RestrictionsFormViewModel` owns form state (volunteer search, service codes, positions, rules parsing/serialization). These are intentionally separate — do NOT merge them back into a single ViewModel.
+- `RestrictionFormScreen` gets schedule from `RestrictionsFormViewModel.formState.schedule`; volunteer from `formState.selectedVolunteer`. No dependency on list state.
 - `AndroidManifest.xml` currently enables cleartext traffic for HTTP dev backends (`android:usesCleartextTraffic="true"`).
 
 ## Safe Change Strategy For Agents
 - For API changes: update DTO + `ApiService` + affected ViewModel state mapping + composable rendering in one patch.
 - For new screens: add `Screen` route object + `NavHost` entry in `AppNavigation.kt`, then follow existing `hiltViewModel()` pattern.
 - Prefer incremental refactors (introducing repositories/use-cases) behind existing ViewModel interfaces to avoid navigation/state regressions.
+- Shared restriction UI components live in `ui/restrictions/components/`: `ScheduleBanner`, `RestrictionCard`, `RulesSummary`, `VolunteerSearchField`, `ServiceCodeChips`, `DayPatternSelector`, `SpecificDateSection`, `DateRangeSection`.
+- Service codes for the form come from `GET /schedules/:id/service-codes` — this endpoint returns distinct codes for events in a given schedule.
+- Rules JSON format: `{"mode":"exclude","operator":"OR","serviceCodes":[...],"dayPattern":"even","specificDates":[{"date":"...","positionID":null,"notes":""}],"dateRanges":[{"start":"...","end":"...","positionID":null}]}`.
+- Weekdays and periods fields exist in the backend DTO but are intentionally hidden in the mobile UI.
 
