@@ -1,9 +1,12 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+
 }
 
 android {
@@ -17,7 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        val localProps = java.util.Properties().apply {
+        val localProps = Properties().apply {
             val f = rootProject.file("local.properties")
             if (f.exists()) load(f.inputStream())
         }
