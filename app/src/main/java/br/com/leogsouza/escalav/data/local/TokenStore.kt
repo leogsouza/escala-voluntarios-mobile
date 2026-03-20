@@ -30,6 +30,13 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
         get() = prefs.getBoolean(KEY_BIOMETRIC, false)
         set(v) = prefs.edit().putBoolean(KEY_BIOMETRIC, v).apply()
 
+    /** Clears only auth tokens; preserves the biometric opt-in flag. */
+    fun clearTokens() = prefs.edit()
+        .remove(KEY_ACCESS)
+        .remove(KEY_REFRESH)
+        .apply()
+
+    /** Clears everything including the biometric flag (e.g. explicit "disable biometric"). */
     fun clear() = prefs.edit().clear().apply()
 
     companion object {

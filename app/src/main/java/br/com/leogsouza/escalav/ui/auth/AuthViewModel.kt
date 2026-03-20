@@ -41,7 +41,8 @@ class AuthViewModel @Inject constructor(
 
     // Biometric helpers (read-once properties, no StateFlow needed)
     val biometricEnabled: Boolean get() = tokenStore.biometricEnabled
-    val hasStoredSession: Boolean get() = tokenStore.accessToken != null
+    val hasStoredSession: Boolean
+        get() = tokenStore.accessToken != null || tokenStore.refreshToken != null
 
     init {
         viewModelScope.launch {
@@ -106,15 +107,11 @@ class AuthViewModel @Inject constructor(
     fun loginWithBiometric() {
         viewModelScope.launch {
             val accessToken = tokenStore.accessToken
-            if (accessToken == null) {
-                tokenStore.biometricEnabled = false
-                _state.value = AuthState.Error("Sessão expirada. Faça login novamente.")
-                return@launch
-            }
-            if (!isTokenExpired(accessToken)) {
+            // Fast path: access token present and still valid
+            if (accessToken != null && !isTokenExpired(accessToken)) {
                 decodeJwt(accessToken)?.let { _state.value = AuthState.Success(it); return@launch }
             }
-            // Expired — attempt refresh
+            // Access token absent (post-logout) or expired — try silent refresh
             val refreshed = tryRefresh()
             if (!refreshed) {
                 tokenStore.biometricEnabled = false
@@ -128,7 +125,7 @@ class AuthViewModel @Inject constructor(
 
     // ── Logout ─────────────────────────────────────────────────────────────────
     fun logout() {
-        tokenStore.clear()
+        tokenStore.clearTokens()          // keep biometricEnabled so the prompt re-appears on next login
         _forcedLogoutMessage.value = null
         _state.value = AuthState.LoggedOut
     }
@@ -148,7 +145,7 @@ class AuthViewModel @Inject constructor(
             _state.value = AuthState.Success(session)
             true
         } catch (_: Exception) {
-            tokenStore.clear()
+            tokenStore.clearTokens()
             false
         }
     }
