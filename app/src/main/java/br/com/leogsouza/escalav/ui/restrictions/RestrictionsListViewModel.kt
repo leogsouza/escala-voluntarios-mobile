@@ -17,6 +17,7 @@ import javax.inject.Inject
 
 data class RestrictionsListUiState(
     val loading: Boolean = false,
+    val refreshing: Boolean = false,
     val error: String? = null,
     val restrictions: List<RestrictionDto> = emptyList(),
     val schedule: ScheduleDto? = null,
@@ -50,7 +51,27 @@ class RestrictionsListViewModel @Inject constructor(
                 }
                 loadRestrictions()
             } catch (e: Exception) {
-                _state.value = _state.value.copy(loading = false, error = e.message)
+                _state.value = _state.value.copy(loading = false, refreshing = false, error = e.message)
+            }
+        }
+    }
+
+    /** Pull-to-refresh: keeps the current list visible while fetching fresh data. */
+    fun refresh() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(refreshing = true, error = null)
+            try {
+                val schedules = api.getSchedules(page = 1, pageSize = 50)
+                val schedule = schedules.data.firstDraftSchedule()
+                _state.value = _state.value.copy(schedule = schedule)
+
+                if (schedule != null) {
+                    val roleCounts = api.getRestrictionRoleCounts(schedule.id)
+                    _state.value = _state.value.copy(roleCounts = roleCounts)
+                }
+                loadRestrictions()
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(refreshing = false, error = e.message)
             }
         }
     }
@@ -68,11 +89,12 @@ class RestrictionsListViewModel @Inject constructor(
             )
             _state.value = _state.value.copy(
                 loading = false,
+                refreshing = false,
                 restrictions = result.data,
                 totalItems = result.pagination.totalItems
             )
         } catch (e: Exception) {
-            _state.value = _state.value.copy(loading = false, error = e.message)
+            _state.value = _state.value.copy(loading = false, refreshing = false, error = e.message)
         }
     }
 
@@ -96,7 +118,7 @@ class RestrictionsListViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.deleteRestriction(id)
-                loadInitialData() // refresh list + counts
+                refresh()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(error = e.message)
             }

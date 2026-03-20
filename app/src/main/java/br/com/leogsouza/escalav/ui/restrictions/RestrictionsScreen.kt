@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -162,34 +163,46 @@ fun RestrictionsScreen(
                 }
             }
 
-            // Content area
-            Box(modifier = Modifier.weight(1f)) {
+            // Content area — pull-to-refresh wraps the scrollable list
+            PullToRefreshBox(
+                isRefreshing = state.refreshing,
+                onRefresh = { viewModel.refresh() },
+                modifier = Modifier.weight(1f)
+            ) {
                 when {
-                    state.loading -> CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    // Show centered spinner only on the very first load (list not yet populated)
+                    state.loading && state.restrictions.isEmpty() -> Box(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
 
-                    state.error != null -> Text(
-                        text = state.error!!,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                    )
+                    state.error != null -> Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = state.error!!,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(16.dp)
+                        )
+                    }
 
-                    state.restrictions.isEmpty() -> Text(
-                        text = if (state.searchQuery.isNotBlank()) "Nenhum resultado para \"${state.searchQuery}\"."
-                        else "Nenhuma restrição cadastrada.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF6B7280),
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp)
-                    )
+                    state.restrictions.isEmpty() -> Box(modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = if (state.searchQuery.isNotBlank()) "Nenhum resultado para \"${state.searchQuery}\"."
+                            else "Nenhuma restrição cadastrada.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF6B7280),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(16.dp)
+                        )
+                    }
 
                     else -> LazyColumn(
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         items(state.restrictions, key = { it.id ?: 0 }) { restriction ->
                             RestrictionCard(
