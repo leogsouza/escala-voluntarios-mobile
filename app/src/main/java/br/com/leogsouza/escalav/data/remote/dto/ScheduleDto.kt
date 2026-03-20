@@ -14,6 +14,29 @@ data class ScheduleDto(
 )
 
 @JsonClass(generateAdapter = true)
+data class PaginatedSchedulesDto(
+    val data: List<ScheduleDto>,
+    val pagination: SchedulePaginationDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SchedulePaginationDto(
+    val page: Int? = null,
+    @Json(name = "page_size") val pageSize: Int? = null,
+    @Json(name = "total_items") val totalItems: Int? = null,
+    @Json(name = "total_pages") val totalPages: Int? = null
+)
+
+fun List<ScheduleDto>.firstScheduleByStatus(status: String): ScheduleDto? =
+    firstOrNull { it.status.equals(status, ignoreCase = true) }
+
+fun List<ScheduleDto>.firstPublishedSchedule(): ScheduleDto? =
+    firstScheduleByStatus("PUBLISHED")
+
+fun List<ScheduleDto>.firstDraftSchedule(): ScheduleDto? =
+    firstScheduleByStatus("DRAFT")
+
+@JsonClass(generateAdapter = true)
 data class EventDto(
     val id: Int,
     val date: String,
@@ -47,6 +70,8 @@ data class VolunteerDto(
     val name: String,
     @Json(name = "full_name") val fullName: String,
     val active: Boolean?,
+    @Json(name = "main_role_id") val mainRoleId: Int?,
+    @Json(name = "secondary_role_id") val secondaryRoleId: Int?,
     @Json(name = "main_role") val mainRole: RoleDto?,
     @Json(name = "secondary_role") val secondaryRole: RoleDto?
 )
