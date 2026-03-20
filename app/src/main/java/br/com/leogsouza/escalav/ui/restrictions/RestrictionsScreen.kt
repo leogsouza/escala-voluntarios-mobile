@@ -109,7 +109,7 @@ fun RestrictionsScreen(
                 ScheduleBanner(
                     schedule = schedule,
                     itemCount = state.totalItems,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
             }
 

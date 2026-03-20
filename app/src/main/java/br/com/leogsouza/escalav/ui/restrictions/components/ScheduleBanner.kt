@@ -1,6 +1,5 @@
 package br.com.leogsouza.escalav.ui.restrictions.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,13 +11,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import br.com.leogsouza.escalav.data.remote.dto.ScheduleDto
 import java.time.LocalDate
@@ -37,43 +37,58 @@ fun ScheduleBanner(
 ) {
     if (schedule == null) return
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(BannerBg)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = BannerBg,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.CalendarMonth,
-                contentDescription = null,
-                tint = BannerText,
-                modifier = Modifier.size(18.dp)
-            )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                Text(
-                    text = schedule.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = BannerText
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // weight(1f) ensures this side gets all remaining width after the
+            // count text is measured, preventing the title from being compressed
+            // into 3+ lines and inflating the banner height.
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.CalendarMonth,
+                    contentDescription = null,
+                    tint = BannerText,
+                    modifier = Modifier.size(18.dp)
                 )
+                Column(modifier = Modifier.padding(start = 8.dp)) {
+                    Text(
+                        text = schedule.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BannerText,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = formatScheduleDateRange(schedule.startDate, schedule.endDate),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = BannerSubtext
+                    )
+                }
+            }
+            if (itemCount != null) {
                 Text(
-                    text = formatScheduleDateRange(schedule.startDate, schedule.endDate),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = BannerSubtext
+                    text = if (itemCount == 1) "1 restrição" else "$itemCount restrições",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = BannerSubtext,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
-        }
-        if (itemCount != null) {
-            Text(
-                text = if (itemCount == 1) "1 restrição" else "$itemCount restrições",
-                style = MaterialTheme.typography.labelSmall,
-                color = BannerSubtext,
-                fontWeight = FontWeight.Medium
-            )
         }
     }
 }
