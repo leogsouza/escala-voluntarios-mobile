@@ -26,10 +26,15 @@ class TokenStore @Inject constructor(@ApplicationContext context: Context) {
         get() = prefs.getString(KEY_REFRESH, null)
         set(v) = prefs.edit().putString(KEY_REFRESH, v).apply()
 
+    var biometricEnabled: Boolean
+        get() = prefs.getBoolean(KEY_BIOMETRIC, false)
+        set(v) = prefs.edit().putBoolean(KEY_BIOMETRIC, v).apply()
+
     fun clear() = prefs.edit().clear().apply()
 
     companion object {
         private const val KEY_ACCESS = "access_token"
         private const val KEY_REFRESH = "refresh_token"
+        private const val KEY_BIOMETRIC = "biometric_enabled"
     }
 }

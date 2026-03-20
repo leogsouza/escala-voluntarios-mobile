@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.moshi.kotlin)
     ksp(libs.moshi.codegen)
     implementation(libs.security.crypto)
+    implementation(libs.biometric)
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.ui.tooling)
 }
