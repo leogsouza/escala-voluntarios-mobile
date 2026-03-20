@@ -9,6 +9,7 @@ import br.com.leogsouza.escalav.data.remote.api.ApiService
 import br.com.leogsouza.escalav.data.remote.dto.LoginRequest
 import br.com.leogsouza.escalav.data.remote.dto.RefreshRequest
 import br.com.leogsouza.escalav.domain.model.UserSession
+import retrofit2.HttpException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -125,7 +126,7 @@ class AuthViewModel @Inject constructor(
 
     // ── Logout ─────────────────────────────────────────────────────────────────
     fun logout() {
-        tokenStore.clearTokens()          // keep biometricEnabled so the prompt re-appears on next login
+        tokenStore.accessToken = null     // keep refreshToken for post-logout biometric re-auth
         _forcedLogoutMessage.value = null
         _state.value = AuthState.LoggedOut
     }
@@ -144,8 +145,12 @@ class AuthViewModel @Inject constructor(
             val session = decodeJwt(tokens.accessToken) ?: return false
             _state.value = AuthState.Success(session)
             true
+        } catch (e: HttpException) {
+            // 401/403 = refresh token genuinely rejected by the server → wipe everything
+            if (e.code() == 401 || e.code() == 403) tokenStore.clearTokens()
+            false
         } catch (_: Exception) {
-            tokenStore.clearTokens()
+            // Network / timeout errors — keep tokens intact so biometric can retry
             false
         }
     }
