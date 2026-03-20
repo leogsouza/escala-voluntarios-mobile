@@ -115,6 +115,7 @@ fun AppNavigation() {
             composable(Screen.Calendar.route) {
                 ScheduleCalendarScreen(
                     onDayClick = { date -> navController.navigate(Screen.DayDetail.createRoute(date)) },
+                    onEventClick = { id -> navController.navigate(Screen.EventDetail.createRoute(id)) },
                     onRestrictionsClick = { navController.navigate(Screen.Restrictions.route) },
                     onLogout = { authViewModel.logout() }
                 )

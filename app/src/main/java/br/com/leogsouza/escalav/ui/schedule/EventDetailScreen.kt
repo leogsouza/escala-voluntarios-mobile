@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import br.com.leogsouza.escalav.data.remote.dto.AssignmentDto
 import br.com.leogsouza.escalav.data.remote.dto.EventDto
-import java.text.Normalizer
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -32,12 +31,6 @@ private data class RoleGroupUi(
     val assignments: List<AssignmentDto>
 )
 
-private enum class EventVisualType {
-    RJM,
-    ENSAIO,
-    CULTO,
-    DEFAULT
-}
 
 private val ScreenBg = Color(0xFFF3F4F6)
 private val PanelBorder = Color(0xFFE5E7EB)
@@ -55,12 +48,12 @@ private val RoleDisplayOrder = listOf(
 )
 
 private val AvatarPalette = listOf(
-    Color(0xFF3B82F6),
-    Color(0xFFA855F7),
-    Color(0xFFEC4899),
-    Color(0xFFFB7185),
-    Color(0xFFF97316),
-    Color(0xFF06B6D4)
+    Color(0xFF3B82F6), // blue
+    Color(0xFFA855F7), // purple
+    Color(0xFFEC4899), // magenta
+    Color(0xFFFF6900), // orange (matches web #FF6900)
+    Color(0xFF06B6D4), // cyan
+    Color(0xFF10B981)  // green
 )
 
 private val RoleOrderIndex = RoleDisplayOrder
@@ -255,7 +248,7 @@ private fun RoleSection(group: RoleGroupUi) {
             Spacer(modifier = Modifier.height(8.dp))
 
             group.assignments.forEachIndexed { index, assignment ->
-                VolunteerRow(assignment)
+                VolunteerRow(assignment = assignment, avatarIndex = index)
                 if (index < group.assignments.lastIndex) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -265,11 +258,11 @@ private fun RoleSection(group: RoleGroupUi) {
 }
 
 @Composable
-private fun VolunteerRow(assignment: AssignmentDto) {
+private fun VolunteerRow(assignment: AssignmentDto, avatarIndex: Int) {
     val displayName = assignment.volunteer?.name?.ifBlank { null }
         ?: assignment.volunteer?.fullName
         ?: "Sem nome"
-    val avatarColor = colorForVolunteer(displayName)
+    val avatarColor = AvatarPalette[avatarIndex % AvatarPalette.size]
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -362,43 +355,12 @@ private fun volunteerCounterLabel(count: Int): String {
     return if (count == 1) "1 Voluntário" else "$count Voluntários"
 }
 
+// normalizeRoleName delegates to the shared helper in EventColors.kt
+private fun normalizeRoleName(value: String): String = normalizeAccents(value)
+
 private fun canonicalRoleName(raw: String): String {
     val normalized = normalizeRoleName(raw)
     return RoleDisplayOrder.firstOrNull { normalizeRoleName(it) == normalized } ?: raw
 }
 
-private fun normalizeRoleName(value: String): String {
-    val withoutAccents = Normalizer.normalize(value, Normalizer.Form.NFD)
-        .replace("\\p{M}+".toRegex(), "")
-    return withoutAccents.lowercase(Locale.getDefault()).trim()
-}
-
-private fun colorForVolunteer(name: String): Color {
-    val index = kotlin.math.abs(name.hashCode()) % AvatarPalette.size
-    return AvatarPalette[index]
-}
-
-private fun headerGradientColors(event: EventDto): List<Color> {
-    return when (eventVisualType(event)) {
-        EventVisualType.RJM -> listOf(Color(0xFF8A2BE2), Color(0xFF6A0DAD))
-        EventVisualType.ENSAIO -> listOf(Color(0xFFFF8A00), Color(0xFFFF6A00))
-        EventVisualType.CULTO -> listOf(Color(0xFF3B5BDB), Color(0xFF2E4FD6))
-        EventVisualType.DEFAULT -> listOf(Color(0xFF4B5563), Color(0xFF374151))
-    }
-}
-
-private fun eventVisualType(event: EventDto): EventVisualType {
-    val code = normalizeRoleName(event.serviceCode)
-    if (code.contains("rjm")) return EventVisualType.RJM
-    if (code.contains("ensaio") || code == "el") return EventVisualType.ENSAIO
-    if (code.contains("culto") || code == "dn") return EventVisualType.CULTO
-
-    val service = normalizeRoleName(event.service)
-    return when {
-        service.contains("rjm") -> EventVisualType.RJM
-        service.contains("ensaio") -> EventVisualType.ENSAIO
-        service.contains("culto") -> EventVisualType.CULTO
-        else -> EventVisualType.DEFAULT
-    }
-}
-
+// normalizeRoleName delegates to the shared helper in EventColors.kt
