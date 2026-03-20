@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import br.com.leogsouza.escalav.data.remote.api.ApiService
 import br.com.leogsouza.escalav.data.remote.dto.EventDto
 import br.com.leogsouza.escalav.data.remote.dto.ScheduleDto
+import br.com.leogsouza.escalav.data.remote.dto.firstPublishedSchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,8 +44,8 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             try {
-                val schedules = api.getActiveSchedules()
-                val schedule = schedules.firstOrNull()
+                val schedules = api.getSchedules(page = 1, pageSize = 50)
+                val schedule = schedules.data.firstPublishedSchedule()
                 val initialMonth = resolveInitialMonth(schedule)
                 _state.value = _state.value.copy(schedule = schedule, selectedMonth = initialMonth)
                 updateMonthNavigationAvailability(initialMonth)

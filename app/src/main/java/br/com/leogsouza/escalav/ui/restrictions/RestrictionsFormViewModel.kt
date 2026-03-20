@@ -12,6 +12,7 @@ import br.com.leogsouza.escalav.data.remote.dto.ScheduleDto
 import br.com.leogsouza.escalav.data.remote.dto.ServiceCodeDto
 import br.com.leogsouza.escalav.data.remote.dto.SpecificDateDto
 import br.com.leogsouza.escalav.data.remote.dto.VolunteerDto
+import br.com.leogsouza.escalav.data.remote.dto.firstPublishedSchedule
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,8 +65,8 @@ class RestrictionsFormViewModel @Inject constructor(
             _formState.value = _formState.value.copy(loading = true, error = null)
             try {
                 // Load schedule, types in parallel via sequential-but-fast calls
-                val schedules = api.getActiveSchedules()
-                val schedule = schedules.firstOrNull()
+                val schedules = api.getSchedules(page = 1, pageSize = 50)
+                val schedule = schedules.data.firstPublishedSchedule()
 
                 val types = api.getRestrictionTypes()
 

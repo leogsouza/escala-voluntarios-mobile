@@ -3,10 +3,10 @@ package br.com.leogsouza.escalav.ui.restrictions
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.leogsouza.escalav.data.remote.api.ApiService
-import br.com.leogsouza.escalav.data.remote.dto.PaginatedRestrictionsDto
 import br.com.leogsouza.escalav.data.remote.dto.RestrictionDto
 import br.com.leogsouza.escalav.data.remote.dto.RoleCountDto
 import br.com.leogsouza.escalav.data.remote.dto.ScheduleDto
+import br.com.leogsouza.escalav.data.remote.dto.firstDraftSchedule
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -40,8 +40,8 @@ class RestrictionsListViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             try {
-                val schedules = api.getActiveSchedules()
-                val schedule = schedules.firstOrNull()
+                val schedules = api.getSchedules(page = 1, pageSize = 50)
+                val schedule = schedules.data.firstDraftSchedule()
                 _state.value = _state.value.copy(schedule = schedule)
 
                 if (schedule != null) {

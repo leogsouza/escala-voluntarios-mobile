@@ -12,8 +12,11 @@ interface ApiService {
     suspend fun refresh(@Body body: RefreshRequest): AuthTokens
 
     // Schedules
-    @GET("schedules/active")
-    suspend fun getActiveSchedules(): List<ScheduleDto>
+    @GET("schedules")
+    suspend fun getSchedules(
+        @Query("page") page: Int? = null,
+        @Query("page_size") pageSize: Int? = null
+    ): PaginatedSchedulesDto
 
     // Events
     @GET("events/month/{year}/{month}")
